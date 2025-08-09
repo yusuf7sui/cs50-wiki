@@ -27,6 +27,11 @@ textarea {
     line-height: 15px;
 }
 
+.search-button {
+    width: 50%;
+    margin-top: 5px;
+}
+
 .sidebar {
     background-color: #f0f0f0;
     height: 100vh;
