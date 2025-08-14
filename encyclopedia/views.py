@@ -4,6 +4,8 @@ from django.http import HttpResponseRedirect
 
 from . import util
 import markdown2
+import random
+random.seed(10)
 
 
 def index(request):
@@ -57,4 +59,13 @@ def new_page(request):
         util.save_entry(title, content)
         return HttpResponseRedirect(reverse("entry", kwargs={"entry": title}))
     return render(request, "encyclopedia/new-page.html")
+
+def random_page(request):
+    """
     
+    """    
+    result_entries = util.list_entries()
+    entries_size = len(result_entries) - 1
+    random_entry = result_entries[random.randint(0, entries_size)]
+    return HttpResponseRedirect(reverse("entry", kwargs={"entry": random_entry}))
+
