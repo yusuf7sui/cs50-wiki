@@ -16,16 +16,16 @@ def index(request):
         "entries": util.list_entries()
     })
 
-def entry(request, entry):
+def entry(request, title):
     """
     Renders a specific entry page.
     If the entry doesn't exist, an error page will be shown.
     """
-    entry = util.get_entry(entry)
+    entry = util.get_entry(title)
     if entry is not None:
         html_content = markdown2.markdown(entry)
         return render(request, "encyclopedia/entry.html",{
-        "title": entry,
+        "title": title,
         "content": html_content
         })
     else:
@@ -42,30 +42,42 @@ def search(request):
     query = request.GET.get("q", "")        
     result_entries = list(filter(lambda x: query.lower() in x.lower(), result_entries))
     if util.get_entry(query):
-        return HttpResponseRedirect(reverse("entry", kwargs={"entry": query}))
+        return HttpResponseRedirect(reverse("entry", kwargs={"title": query}))
     return render(request, "encyclopedia/search-results.html", {
         "results": result_entries
     })
 
 def new_page(request):
     """
-    If the create click button is clicked the create new page is rendered.
-    When the form is submitted via POST with a title and content,
-    the entry will be saved and the user is redirected to the new entry page.
+    Renders the 'Create New Page' or saves a new entry via POST and redirects to that entry page.
     """
     if request.method == "POST":
         title = request.POST.get("title")
         content = request.POST.get("content")
         util.save_entry(title, content)
-        return HttpResponseRedirect(reverse("entry", kwargs={"entry": title}))
+        return HttpResponseRedirect(reverse("entry", kwargs={"title": title}))
     return render(request, "encyclopedia/new-page.html")
 
 def random_page(request):
     """
-    
-    """    
+    Redirects to a random entry page.
+    """
     result_entries = util.list_entries()
     entries_size = len(result_entries) - 1
     random_entry = result_entries[random.randint(0, entries_size)]
-    return HttpResponseRedirect(reverse("entry", kwargs={"entry": random_entry}))
+    return HttpResponseRedirect(reverse("entry", kwargs={"title": random_entry}))
+
+def edit_page(request, title):
+    """
+    Renders the edit page or updates the content of an entry via POST. 
+    """
+    entry = util.get_entry(title)
+    if request.method == "POST":
+        content = request.POST.get("content")
+        util.save_entry(title, content)
+        return HttpResponseRedirect(reverse("entry", kwargs={"title": title}))
+    return render(request, "encyclopedia/entry-edit.html", {
+        "title": title,
+        "content": entry
+    })
 
